@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "honocc", "honocc.fsproj", "{D49AA0AD-7E1B-4E06-B900-C55E1B2D5CBC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D49AA0AD-7E1B-4E06-B900-C55E1B2D5CBC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D49AA0AD-7E1B-4E06-B900-C55E1B2D5CBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D49AA0AD-7E1B-4E06-B900-C55E1B2D5CBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D49AA0AD-7E1B-4E06-B900-C55E1B2D5CBC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
