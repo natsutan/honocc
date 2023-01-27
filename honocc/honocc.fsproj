@@ -6,6 +6,8 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Include="honodef.fs" />
+        <Compile Include="tokenizer.fs" />
         <Compile Include="honocc.fs" />
     </ItemGroup>
 
