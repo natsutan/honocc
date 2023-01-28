@@ -21,6 +21,7 @@ type TokenKind =
    | Return
    | Int
    | Char
+   | Void
    | EOF
    
 type Token = { Kind : TokenKind; Src : string; Line : int ; Pos : int }
