@@ -8,7 +8,8 @@ let main args =
     // Return 0. This indicates success.
     let filename = args[0]
     
-    let l = Tokenizer.tokenizeFromFile(filename)
-    Tokenizer.debPrintTokens l |> ignore
+    let token_stream = Tokenizer.tokenizeFromFile filename
+    token_stream.debPrintTokens()
+    let func = Parser.parse token_stream
     
     0
