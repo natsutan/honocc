@@ -1,5 +1,8 @@
 ﻿// For more information see https://aka.ms/fsharp-console-apps
 
+let ast_dumpfile = "work/ast.md"
+
+
 [<EntryPoint>]
 let main args =
     if args.Length <> 1 then
@@ -11,5 +14,5 @@ let main args =
     let token_stream = Tokenizer.tokenizeFromFile filename
     token_stream.debPrintTokens()
     let func = Parser.parse token_stream
-    
+    Astdump.dump(func, ast_dumpfile) |> ignore
     0
