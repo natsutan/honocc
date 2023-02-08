@@ -22,7 +22,8 @@ let private isAlpha c =
 
 let private printTokens (tokens: Token List) =
     printfn "===== TOKENIZE ====="
-    List.map printToken tokens
+    List.map printToken tokens |> ignore
+    () 
      
 let rec private tokenize (input_str :string, filename : string, line : int, pos : int) =
     if input_str = "" then
