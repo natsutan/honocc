@@ -10,6 +10,7 @@
         <Compile Include="tokenizer.fs" />
         <Compile Include="parser.fs" />
         <Compile Include="astdump.fs" />
+        <Compile Include="genriscv.fs" />
         <Compile Include="genx64.fs" />
         <Compile Include="honocc.fs" />
     </ItemGroup>

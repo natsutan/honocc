@@ -2,7 +2,8 @@
 open System.IO
 
 let ast_dumpfile = "work/ast.md"
-let work_dir = "work"
+let work_dir_x64 = "work_x64"
+let work_dir_riscv = "work_riscv"
 
 let toAsmFileName (src_path :string) =
     let src_base_name  = Path.GetFileNameWithoutExtension(src_path)
@@ -27,10 +28,14 @@ let main args =
     
     // Generate
     let asm_filename = toAsmFileName filename
-    let asm_file_path = Path.Combine(work_dir, asm_filename)
+    let asm_file_path_x64 = Path.Combine(work_dir_x64, asm_filename)
+    Genx86.generate(asm_file_path_x64, func) |> ignore
+    printfn $"write to %s{asm_file_path_x64}"
     
-    Genx86.generate(asm_file_path, func) |> ignore
+    let asm_file_path_riscv = Path.Combine(work_dir_riscv, asm_filename)
+    Riscv.generate(asm_file_path_riscv, func) |> ignore    
+    printfn $"write to %s{asm_file_path_riscv}"
     
     
-    printfn $"write to %s{asm_file_path}"
     0
+    
