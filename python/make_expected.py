@@ -57,7 +57,5 @@ def main():
         create_category_expected(cat)
 
 
-
-
 if __name__ == "__main__":
     main()

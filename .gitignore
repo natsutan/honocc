@@ -1,4 +1,7 @@
 /.honocc/
 /.idea/
-
+test/
+work/
+work_riscv/
+work_x86/
 .fake
