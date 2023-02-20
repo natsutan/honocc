@@ -1,23 +1,37 @@
-﻿// For more information see https://aka.ms/fsharp-console-apps
-open System.IO
+﻿open System.IO
 
 let ast_dumpfile = "work/ast.md"
-let work_dir_x64 = "work_x64"
-let work_dir_riscv = "work_riscv"
+let mutable work_dir_x64 = "work_x64"
+let mutable work_dir_riscv = "work_riscv"
 
 let toAsmFileName (src_path :string) =
     let src_base_name  = Path.GetFileNameWithoutExtension(src_path)
     src_base_name + ".s"
 
 
+// See https://jyuch.hatenablog.com/entry/2017/08/30/233000
+type Param = { OutputDir:string; File:string }
+
 [<EntryPoint>]
 let main args =
-    if args.Length <> 1 then
-        printfn "Usage: honocc input_file"
-        exit 1
-    // Return 0. This indicates success.
-    let filename = args[0]
     
+    let rec parseImpl input param =
+                match input with
+                | "--output-dir" :: dir :: tail ->
+                    parseImpl tail { param with OutputDir = dir }
+                | file :: tail ->
+                    parseImpl tail { param with File = file }
+                | [] -> param
+        
+    let parse input = parseImpl (Array.toList input) { OutputDir = "work"; File = "" } 
+    
+    let options = parse args
+      
+    let filename = options.File
+    work_dir_x64 <- Path.Combine(options.OutputDir, "x64")
+    work_dir_riscv <- Path.Combine(options.OutputDir, "riscv")
+   
+       
     // Tokenize
     let token_stream = Tokenizer.tokenizeFromFile filename
     //token_stream.debPrintTokens()
