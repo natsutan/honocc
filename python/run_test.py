@@ -6,8 +6,6 @@ import difflib
 
 CSRC_ROOT_DIR = "test/csrc"
 EXPECTED_ROOT_DIR = "test/expected"
-X64_WORK_DIR = 'work_x64'
-RISCV_WORK_DIR = 'work_riscv'
 BUILD_DIR = 'honocc'
 COMPILER_PATH = 'honocc/bin/Debug/net6.0/honocc'
 
@@ -19,8 +17,8 @@ riscv_passed = 0
 def compile(target, cat, src):
 
     target_src = os.path.join(CSRC_ROOT_DIR, cat, src)
-    # honocc/bin/Debug/net6.0/honocc test/csrc/00_base/first.c
-    cmd = COMPILER_PATH + " " + target_src + " > /dev/null "
+    # honocc/bin/Debug/net6.0/honocc --output-dir test/x64/00_base test/csrc/00_base/first.c
+    cmd = COMPILER_PATH + " --output-dir-x64 test/x64/" + cat + " --output-dir-riscv test/riscv/" + cat + " " + target_src + " > /dev/null "
     result = subprocess.run(cmd, shell=True)
     if result.returncode != 0:
         print("Error:", cmd)
@@ -34,7 +32,7 @@ def link(target, cat, src):
     asm_file = base_name + ".s"
 
     exe_path = os.path.join('test', target, cat, base_name)
-    asm_path = os.path.join(work_dir(target), asm_file)
+    asm_path = os.path.join('test', target, cat, asm_file)
 
     if target == 'x64':
         cmd = "gcc " + asm_path + " " + hlib_path + " -o " + exe_path
@@ -116,15 +114,6 @@ def run_test_single(target, cat, src):
     return True
 
 
-def work_dir(target):
-    if target == 'x64':
-        return X64_WORK_DIR
-    elif target == 'riscv':
-        return RISCV_WORK_DIR
-    else:
-        print('ERROR unsupported arch ', target)
-        sys.exit(1)
-
 def record_test(target, result, cat, csrc):
     global total_test_cnt, x64_passed, riscv_passed
     total_test_cnt += 1
@@ -139,11 +128,10 @@ def record_test(target, result, cat, csrc):
 
 
 def run_category_test(target, cat):
-    expected_dir = os.path.join(work_dir(target), cat)
-    os.makedirs(expected_dir, exist_ok=True)
+    test_dir = os.path.join('test', target, cat)
+    os.makedirs(test_dir, exist_ok=True)
     output_dir = os.path.join('test', target, cat)
     os.makedirs(output_dir, exist_ok=True)
-
 
     c_sources = glob.glob(os.path.join(CSRC_ROOT_DIR, cat) + "/*.c")
     for csrc in c_sources:

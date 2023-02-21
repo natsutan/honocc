@@ -10,26 +10,28 @@ let toAsmFileName (src_path :string) =
 
 
 // See https://jyuch.hatenablog.com/entry/2017/08/30/233000
-type Param = { OutputDir:string; File:string }
+type Param = { OutputDirX64:string;OutputDirRiscv:string; File:string }
 
 [<EntryPoint>]
 let main args =
     
     let rec parseImpl input param =
                 match input with
-                | "--output-dir" :: dir :: tail ->
-                    parseImpl tail { param with OutputDir = dir }
+                | "--output-dir-x64" :: dir :: tail ->
+                    parseImpl tail { param with OutputDirX64 = dir }
+                | "--output-dir-riscv" :: dir :: tail ->
+                    parseImpl tail { param with OutputDirRiscv = dir }
                 | file :: tail ->
                     parseImpl tail { param with File = file }
                 | [] -> param
         
-    let parse input = parseImpl (Array.toList input) { OutputDir = "work"; File = "" } 
+    let parse input = parseImpl (Array.toList input) {OutputDirX64 = work_dir_x64; OutputDirRiscv = work_dir_riscv; File = "" } 
     
     let options = parse args
       
     let filename = options.File
-    work_dir_x64 <- Path.Combine(options.OutputDir, "x64")
-    work_dir_riscv <- Path.Combine(options.OutputDir, "riscv")
+    work_dir_x64 <- options.OutputDirX64
+    work_dir_riscv <- options.OutputDirRiscv
    
        
     // Tokenize
