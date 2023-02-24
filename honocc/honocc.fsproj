@@ -7,6 +7,7 @@
 
     <ItemGroup>
         <Compile Include="honodef.fs" />
+        <Compile Include="csource.fs" />
         <Compile Include="tokenizer.fs" />
         <Compile Include="parser.fs" />
         <Compile Include="astdump.fs" />

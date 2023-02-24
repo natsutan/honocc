@@ -1,6 +1,7 @@
 module Parser
 open Honodef
 open Tokenizer
+open Csource
 
 exception ParseError of Token * string
 
@@ -72,6 +73,9 @@ let parse token_stream  =
         p_function token_stream
     with
     | ParseError (token, s) ->
-        printfn($"%A{s} Token = %A{token}")
+        let err_pos = Csource.findErrorPosition token
+        printfn($"ERROR:%s{s}")
+        printfn($"%s{err_pos}")
+        
         exit 1
     
