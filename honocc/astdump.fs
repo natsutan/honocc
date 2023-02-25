@@ -15,7 +15,10 @@ let rec private write_funccall(funccall : NdFuncCall, fp, node_num) =
         nn_param <- nn_new
         
     nn_param
+and write_binop(binop: NdBinOp, fp, node_num) =
     
+    
+    node_num
 and write_number(number : NdNum, fp, node_num) =
     let value = number.Value
     fprintfn fp $"\t%d{node_num}([num:%d{value}])"
@@ -27,6 +30,7 @@ and write_ast(ast, fp, node_num) =
     match ast with
     | Num(num) -> write_number(num, fp, node_num)
     | FuncCall(fcall) -> write_funccall(fcall, fp, node_num)
+    | BinOp(binop) -> write_binop(binop, fp, node_num)
 
 let private write_function (ast : NdFunction, fp, node_num) =
     let name = ast.Name

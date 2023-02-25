@@ -50,14 +50,39 @@ and stmt ts =
     let ast = expr ts
     skip(ts, TokenKind.SemiColon)
     ast
-// expr = num
+// expr = term { + term}
+//        term { - term }
 //       | putd
 and expr ts =
+    let token = ts.get()
+    match token.Kind with
+    | TokenKind.DebPutd ->
+        ts.consume()
+        putd ts
+    | _ ->
+        let ast = term ts
+        let token = ts.get()
+        match token.Kind with
+        | TokenKind.Operator("+") ->
+            ts.consume()
+            let ast_r = term ts
+            Ast.BinOp({NdBinOp.op=BinOpKind.Add; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
+        | _ -> ast
+// term = factor { * factor }
+//        | factor { / factor}
+and term ts =
+    factor ts
+// factor = num
+//        | ( expr )
+and factor ts =
     let token = ts.get()
     ts.consume()
     match token.Kind with
     | TokenKind.Integer(n) -> Ast.Num({NdNum.Value=n; NdNum.Src=token.Src})
-    | TokenKind.DebPutd -> putd ts
+    | TokenKind.LBrace ->
+        let ast = expr ts
+        skip(ts, TokenKind.RBrace)
+        ast
     | _ -> raise(ParseError(token, $"token must be expr"))
 //一時的
 //putd = "putd" "(" expr ")" 

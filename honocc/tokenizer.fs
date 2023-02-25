@@ -69,6 +69,7 @@ type TokenStream(tokens_in : Token list) =
     let tokens = tokens_in
     let mutable p = 0
     member this.get() =
+        //printfn ($"TOKEN get %A{tokens.[p]}")
         tokens.[p]
     member this.consume() =
         p <- p + 1
