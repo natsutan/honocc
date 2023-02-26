@@ -16,9 +16,20 @@ let rec private write_funccall(funccall : NdFuncCall, fp, node_num) =
         
     nn_param
 and write_binop(binop: NdBinOp, fp, node_num) =
+    let op_name = match binop.op with
+                    | BinOpKind.Add -> "ADD"
+                    | BinOpKind.Sub -> "SUB"
+                    | BinOpKind.Mult -> "MUL"
+                    | BinOpKind.Div -> "DIV"
+    let nn_op = node_num
+    let nn_left = nn_op + 1
+    let nn_right = write_ast(binop.l, fp, nn_left)
+    let nn_next = write_ast(binop.r, fp, nn_right)
+    fprintfn fp $"\t%d{nn_op}([%s{op_name}])"
+    fprintfn fp $"\t%d{nn_op} --> %d{nn_left}"    
+    fprintfn fp $"\t%d{nn_op} --> %d{nn_right}"    
     
-    
-    node_num
+    nn_next
 and write_number(number : NdNum, fp, node_num) =
     let value = number.Value
     fprintfn fp $"\t%d{node_num}([num:%d{value}])"

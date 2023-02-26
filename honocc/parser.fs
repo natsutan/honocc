@@ -50,28 +50,53 @@ and stmt ts =
     let ast = expr ts
     skip(ts, TokenKind.SemiColon)
     ast
-// expr = term { + term}
+// expr = term { + term　}
 //        term { - term }
 //       | putd
 and expr ts =
     let token = ts.get()
-    match token.Kind with
-    | TokenKind.DebPutd ->
-        ts.consume()
-        putd ts
-    | _ ->
-        let ast = term ts
+    if token.Kind = TokenKind.DebPutd then
+         ts.consume()
+         putd ts
+    else        
+        let mutable ast = term ts
+        let mutable finish = false
+        
+        while not finish do
+            let token = ts.get()
+            match token.Kind with
+            | TokenKind.Operator("+") -> 
+                ts.consume()
+                let ast_r = term ts
+                ast <- Ast.BinOp({NdBinOp.op=BinOpKind.Add; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
+            | TokenKind.Operator("-") -> 
+                ts.consume()
+                let ast_r = term ts
+                ast <- Ast.BinOp({NdBinOp.op=BinOpKind.Sub; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
+            | _ ->
+                finish <- true
+        ast
+    
+// term = factor { * factor }
+//        | factor { / factor }
+and term ts =
+    let mutable ast = factor ts
+    let mutable finish = false
+    
+    while not finish do
         let token = ts.get()
         match token.Kind with
-        | TokenKind.Operator("+") ->
+        | TokenKind.Operator("*") ->
             ts.consume()
-            let ast_r = term ts
-            Ast.BinOp({NdBinOp.op=BinOpKind.Add; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
-        | _ -> ast
-// term = factor { * factor }
-//        | factor { / factor}
-and term ts =
-    factor ts
+            let ast_r = factor ts
+            ast <- Ast.BinOp({NdBinOp.op=BinOpKind.Mult; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
+        | TokenKind.Operator("/") ->
+            ts.consume()
+            let ast_r = factor ts
+            ast <- Ast.BinOp({NdBinOp.op=BinOpKind.Div; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })          
+        | _ ->
+            finish <- true
+    ast
 // factor = num
 //        | ( expr )
 and factor ts =
@@ -79,9 +104,9 @@ and factor ts =
     ts.consume()
     match token.Kind with
     | TokenKind.Integer(n) -> Ast.Num({NdNum.Value=n; NdNum.Src=token.Src})
-    | TokenKind.LBrace ->
+    | TokenKind.LParen ->
         let ast = expr ts
-        skip(ts, TokenKind.RBrace)
+        skip(ts, TokenKind.RParen)
         ast
     | _ -> raise(ParseError(token, $"token must be expr"))
 //一時的
