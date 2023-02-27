@@ -18,10 +18,10 @@ def compile(target, cat, src):
 
     target_src = os.path.join(CSRC_ROOT_DIR, cat, src)
     # honocc/bin/Debug/net6.0/honocc --output-dir test/x64/00_base test/csrc/00_base/first.c
-    cmd = COMPILER_PATH + " --output-dir-x64 test/x64/" + cat + " --output-dir-riscv test/riscv/" + cat + " " + target_src + " > /dev/null "
+    cmd = COMPILER_PATH + " --output-dir-x64 test/x64/" + cat + " --output-dir-riscv test/riscv/" + cat + " " + target_src + " > /dev/null 2>&1 "
     result = subprocess.run(cmd, shell=True)
     if result.returncode != 0:
-        print("Error:", cmd)
+        # print("Error:", cmd)
         return False
 
     return True
