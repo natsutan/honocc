@@ -26,8 +26,13 @@ type TokenKind =
    | DebPutd
    | EOF
    
-type Coordinate =  { Src : string; Line : int ; Pos : int }
-
+   
+[<StructuredFormatDisplay("{Display}")>]
+type Coordinate =
+   { Src : string; Line : int ; Pos : int }
+   member private this.Display =
+      $"%s{this.Src} line:%d{this.Line}(%d{this.Pos})" 
+      
 type Token = { Kind : TokenKind; Src : Coordinate }
 
 
@@ -37,8 +42,14 @@ type BinOpKind =
    | Sub
    | Mult
    | Div
+   
+[<StructuredFormatDisplay("{Display}")>]
 
-type NdNum = { Value : int; Src :Coordinate }
+type NdNum =
+   { Value : int; Src :Coordinate }
+   member private this.Display =
+      $"value = %d{this.Value} [%A{this.Src}]" 
+   
 type NdFuncCall = { Name :string; Params : Ast list ; Src : Coordinate }
 and NdBinOp = { op : BinOpKind; l : Ast; r : Ast ; Src : Coordinate  }
 and Ast =
