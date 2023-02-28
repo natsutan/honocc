@@ -29,6 +29,11 @@ let rec gen_expr(fp, ast) =
         pop(fp, "%rdi")
         match binop.op with
             | BinOpKind.Add -> fp.WriteLine "  add %rdi, %rax"
+            | BinOpKind.Sub -> fp.WriteLine "  sub %rdi, %rax"
+            | BinOpKind.Mult -> fp.WriteLine "  imul %rdi, %rax"
+            | BinOpKind.Div ->
+                fp.WriteLine "  cqo"
+                fp.WriteLine "  idiv %rdi"
             | _ -> failwith $"unsupported binop  %A{ast}"
     | _ -> failwith $"unsupported node  %A{ast}"
     
