@@ -49,7 +49,7 @@ let main args =
     printfn $"write to %s{asm_file_path_x64}"
     
     let asm_file_path_riscv = Path.Combine(work_dir_riscv, asm_filename)
-    Riscv.generate(asm_file_path_riscv, func) |> ignore    
+    // Riscv.generate(asm_file_path_riscv, func) |> ignore    
     printfn $"write to %s{asm_file_path_riscv}"
     
     

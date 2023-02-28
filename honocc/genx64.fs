@@ -16,23 +16,36 @@ let pop(fp : StreamWriter, reg) =
 
 let number(fp : StreamWriter, num:NdNum) =
     fp.WriteLine $"  mov $%d{num.Value}, %%rax "
-    push fp
+    
 
-let expr(fp, ast) =
+let rec gen_expr(fp, ast) =
     match ast with
     | Num(node_num) -> number(fp, node_num)
+    | BinOp(binop) ->
+        // Binopの左オペランドをrdi,右オペランドをraxに入れる。
+        gen_expr(fp, binop.r)
+        push(fp)
+        gen_expr(fp, binop.l)
+        pop(fp, "%rdi")
+        match binop.op with
+            | BinOpKind.Add -> fp.WriteLine "  add %rdi, %rax"
+            | _ -> failwith $"unsupported binop  %A{ast}"
     | _ -> failwith $"unsupported node  %A{ast}"
     
 let gen_funccall(fp, funccall: NdFuncCall) =
     // パラメータは１つのみ
-    expr(fp, funccall.Params.Head)
+    gen_expr(fp, funccall.Params.Head)
     
+    //gen_exprの値はraxに入っている。
     //パラメータ一つの時はrdiに値を入れる。    
+    //fp.WriteLine "  mov %rax %rdi"
+    push(fp)
     pop(fp, "%rdi")
     //関数呼び出し
     fp.WriteLine $"  call %s{funccall.Name}"
     
-    
+    //戻り値は一旦０
+    fp.WriteLine "  mov $0, %rax"
 
 
 let gen_body(fp, asts: Ast list) =
