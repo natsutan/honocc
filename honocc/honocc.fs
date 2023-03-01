@@ -49,9 +49,12 @@ let main args =
     printfn $"write to %s{asm_file_path_x64}"
     
     let asm_file_path_riscv = Path.Combine(work_dir_riscv, asm_filename)
-    // Riscv.generate(asm_file_path_riscv, func) |> ignore    
-    printfn $"write to %s{asm_file_path_riscv}"
-    
-    
+    try
+        Riscv.generate(asm_file_path_riscv, func) |> ignore    
+        printfn $"write to %s{asm_file_path_riscv}"
+    with
+    | :? System.Exception as ex ->
+        printfn "riscv gen exception! %s " (ex.Message)
+        ()
     0
     

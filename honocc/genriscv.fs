@@ -9,15 +9,26 @@ let mutable stack_count = 0
 let number(fp : StreamWriter, num:NdNum) =
     fp.WriteLine $"  li      a0, %d{num.Value} "
 
-let expr(fp, ast) =
+let rec gen_expr(fp, ast) =
     match ast with
     | Num(node_num) -> number(fp, node_num)
+    | BinOp(binop) ->
+        // Binopの左オペランドをa0,右オペランドをa1に入れ、結果をa0に入れる。
+        gen_expr(fp, binop.r)
+        fp.WriteLine "  mv a1, a0"
+        gen_expr(fp, binop.l)
+        match binop.op with
+            | BinOpKind.Add -> fp.WriteLine "  add a0, a0, a1"
+            | BinOpKind.Sub -> fp.WriteLine "  sub a0, a0, a1"
+            | BinOpKind.Mult -> fp.WriteLine " mul a0, a0, a1"            
+            | BinOpKind.Div -> fp.WriteLine " div a0, a0, a1"            
+            | _ -> failwith $"unsupported binop  %A{ast}"
     | _ -> failwith $"unsupported node  %A{ast}"
 
 
 let gen_funccall(fp: StreamWriter, funccall: NdFuncCall) =
     // パラメータは１つのみ
-    expr(fp, funccall.Params.Head)
+    gen_expr(fp, funccall.Params.Head)
     
     //exprの結果がa0に入っているので、そのまま関数の引数に
     //関数呼び出し
