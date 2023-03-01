@@ -6,6 +6,19 @@ open Honodef
 let mutable stack_count = 0
 
 
+let push (fp : StreamWriter, reg) =
+    stack_count <- stack_count + 1
+    fp.WriteLine "# push %s{reg}"
+    fp.WriteLine "  addi sp, sp, -8"
+    fp.WriteLine $"  sd %s{reg}, 0(sp)"
+    
+
+let pop(fp : StreamWriter, reg) =
+    stack_count <- stack_count - 1
+    fp.WriteLine "# pop %s{reg}"
+    fp.WriteLine $"  ld %s{reg}, 0(sp)"
+    fp.WriteLine "  addi sp, sp, 8"
+
 let number(fp : StreamWriter, num:NdNum) =
     fp.WriteLine $"  li      a0, %d{num.Value} "
 
@@ -13,10 +26,13 @@ let rec gen_expr(fp, ast) =
     match ast with
     | Num(node_num) -> number(fp, node_num)
     | BinOp(binop) ->
-        // Binopの左オペランドをa0,右オペランドをa1に入れ、結果をa0に入れる。
+        // Binopの右オペランドをa1に入れ、左オペランドをa0,結果をa0に入れる。
         gen_expr(fp, binop.r)
-        fp.WriteLine "  mv a1, a0"
+        //a0に入っている右オペランドをpush
+        push(fp, "a0")
         gen_expr(fp, binop.l)
+        //a1にpushした右オペランドをpop
+        pop(fp, "a1")
         match binop.op with
             | BinOpKind.Add -> fp.WriteLine "  add a0, a0, a1"
             | BinOpKind.Sub -> fp.WriteLine "  sub a0, a0, a1"
