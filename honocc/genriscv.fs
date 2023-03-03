@@ -8,14 +8,14 @@ let mutable stack_count = 0
 
 let push (fp : StreamWriter, reg) =
     stack_count <- stack_count + 1
-    fp.WriteLine "# push %s{reg}"
+    fp.WriteLine $"# push %s{reg}"
     fp.WriteLine "  addi sp, sp, -8"
     fp.WriteLine $"  sd %s{reg}, 0(sp)"
     
 
 let pop(fp : StreamWriter, reg) =
     stack_count <- stack_count - 1
-    fp.WriteLine "# pop %s{reg}"
+    fp.WriteLine $"# pop %s{reg}"
     fp.WriteLine $"  ld %s{reg}, 0(sp)"
     fp.WriteLine "  addi sp, sp, 8"
 
