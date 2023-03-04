@@ -42,6 +42,9 @@ let rec private tokenize (input_str :string, filename : string, line : int, pos 
           | '-'  -> createToken(TokenKind.Operator("-"), filename, line, pos) :: tokenize(input_str[1..], filename, line, pos + 1)
           | '*'  -> createToken(TokenKind.Operator("*"), filename, line, pos) :: tokenize(input_str[1..], filename, line, pos + 1)
           | '/'  -> createToken(TokenKind.Operator("/"), filename, line, pos) :: tokenize(input_str[1..], filename, line, pos + 1)          
+          | '%'  -> createToken(TokenKind.Operator("%"), filename, line, pos) :: tokenize(input_str[1..], filename, line, pos + 1)          
+          | '~'  -> createToken(TokenKind.Operator("~"), filename, line, pos) :: tokenize(input_str[1..], filename, line, pos + 1)          
+          | '^'  -> createToken(TokenKind.Operator("^"), filename, line, pos) :: tokenize(input_str[1..], filename, line, pos + 1)          
           | d when isDigit d ->
               let mutable p = 1
               while isDigit input_str.[p] do
@@ -62,6 +65,33 @@ let rec private tokenize (input_str :string, filename : string, line : int, pos 
                 | "putd" -> createToken(TokenKind.DebPutd, filename, line, pos)
                 | _ -> createToken(TokenKind.Identifier(s), filename, line, pos)
               token :: tokenize(input_str[p..], filename, line, pos + p)
+          | '=' ->
+              if input_str[1] = '=' then
+                  createToken(TokenKind.Operator("=="), filename, line, pos) :: tokenize(input_str[2..], filename, line, pos + 2)
+              else
+                failwith $"unsupported char  %s{input_str}"
+          | '!' ->
+              match input_str[1] with
+              | '=' -> createToken(TokenKind.Operator("!="), filename, line, pos) :: tokenize(input_str[2..], filename, line, pos + 2)
+              | _ -> createToken(TokenKind.Operator("!"), filename, line, pos) :: tokenize(input_str[2..], filename, line, pos + 1)
+          | '<' ->
+              match input_str[1] with
+              | '<' -> createToken(TokenKind.Operator("<<"), filename, line, pos) :: tokenize(input_str[2..], filename, line, pos + 2)
+              | '=' -> createToken(TokenKind.Operator("<="), filename, line, pos) :: tokenize(input_str[2..], filename, line, pos + 2)
+              | _ ->   createToken(TokenKind.Operator("<"), filename, line, pos) :: tokenize(input_str[2..], filename, line, pos + 1)
+          | '>' ->
+              match input_str[1] with
+              | '>' -> createToken(TokenKind.Operator(">>"), filename, line, pos) :: tokenize(input_str[2..], filename, line, pos + 2)
+              | '=' -> createToken(TokenKind.Operator(">="), filename, line, pos) :: tokenize(input_str[2..], filename, line, pos + 2)
+              | _ ->   createToken(TokenKind.Operator(">"), filename, line, pos) :: tokenize(input_str[2..], filename, line, pos + 1)
+          | '|' ->
+              match input_str[1] with
+              | '|' -> createToken(TokenKind.Operator("||"), filename, line, pos) :: tokenize(input_str[2..], filename, line, pos + 2)
+              | _ ->   createToken(TokenKind.Operator("|"), filename, line, pos) :: tokenize(input_str[2..], filename, line, pos + 1)
+          | '&' ->
+              match input_str[1] with
+              | '&' -> createToken(TokenKind.Operator("&&"), filename, line, pos) :: tokenize(input_str[2..], filename, line, pos + 2)
+              | _ ->   createToken(TokenKind.Operator("&"), filename, line, pos) :: tokenize(input_str[2..], filename, line, pos + 1)
           |  _ -> failwith $"unsupported char  %s{input_str}"
     
 
