@@ -34,6 +34,10 @@ let rec gen_expr(fp, ast) =
             | BinOpKind.Div ->
                 fp.WriteLine "  cqo"
                 fp.WriteLine "  idiv %rdi"
+            | BinOpKind.Equal ->
+                fp.WriteLine "  cmp %rdi, %rax"
+                fp.WriteLine "  sete %al"
+                fp.WriteLine "  movzb %al, %rax"
             | _ -> failwith $"unsupported binop  %A{ast}"
     | _ -> failwith $"unsupported node  %A{ast}"
     
