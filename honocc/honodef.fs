@@ -42,6 +42,20 @@ type BinOpKind =
    | Sub
    | Mult
    | Div
+   | Equal
+   | NotEqual
+   | LesserThan
+   | LesserEqual
+   | GreaterThan
+   | GreaterEqual
+   | LShift
+   | RShift
+   | BitAnd
+   | LogicalAnd
+   | BitOr
+   | LogicalOr
+   | BitXor
+   | Modulo
    
 [<StructuredFormatDisplay("{Display}")>]
 

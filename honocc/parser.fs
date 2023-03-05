@@ -53,6 +53,7 @@ and stmt ts =
 // expr = term { + term　}
 //        term { - term }
 //       | putd
+// + - と同じところに二項演算子をいったん全部入れる
 and expr ts =
     let token = ts.get()
     if token.Kind = TokenKind.DebPutd then
@@ -73,6 +74,62 @@ and expr ts =
                 ts.consume()
                 let ast_r = term ts
                 ast <- Ast.BinOp({NdBinOp.op=BinOpKind.Sub; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
+            | TokenKind.Operator("==") -> 
+                ts.consume()
+                let ast_r = term ts
+                ast <- Ast.BinOp({NdBinOp.op=BinOpKind.Equal; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
+            | TokenKind.Operator("!=") -> 
+                ts.consume()
+                let ast_r = term ts
+                ast <- Ast.BinOp({NdBinOp.op=BinOpKind.NotEqual; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
+            | TokenKind.Operator(">") -> 
+                ts.consume()
+                let ast_r = term ts
+                ast <- Ast.BinOp({NdBinOp.op=BinOpKind.LesserThan; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
+            | TokenKind.Operator(">=") -> 
+                ts.consume()
+                let ast_r = term ts
+                ast <- Ast.BinOp({NdBinOp.op=BinOpKind.LesserEqual; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
+            | TokenKind.Operator("<") -> 
+                ts.consume()
+                let ast_r = term ts
+                ast <- Ast.BinOp({NdBinOp.op=BinOpKind.GreaterThan; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
+            | TokenKind.Operator("<=") -> 
+                ts.consume()
+                let ast_r = term ts
+                ast <- Ast.BinOp({NdBinOp.op=BinOpKind.GreaterEqual; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
+            | TokenKind.Operator("<<") -> 
+                ts.consume()
+                let ast_r = term ts
+                ast <- Ast.BinOp({NdBinOp.op=BinOpKind.LShift; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
+            | TokenKind.Operator(">>") -> 
+                ts.consume()
+                let ast_r = term ts
+                ast <- Ast.BinOp({NdBinOp.op=BinOpKind.RShift; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
+            | TokenKind.Operator("|") -> 
+                ts.consume()
+                let ast_r = term ts
+                ast <- Ast.BinOp({NdBinOp.op=BinOpKind.BitOr; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
+            | TokenKind.Operator("||") -> 
+                ts.consume()
+                let ast_r = term ts
+                ast <- Ast.BinOp({NdBinOp.op=BinOpKind.LogicalOr; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
+            | TokenKind.Operator("&") -> 
+                ts.consume()
+                let ast_r = term ts
+                ast <- Ast.BinOp({NdBinOp.op=BinOpKind.BitAnd; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
+            | TokenKind.Operator("&&") -> 
+                ts.consume()
+                let ast_r = term ts
+                ast <- Ast.BinOp({NdBinOp.op=BinOpKind.LogicalAnd; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
+            | TokenKind.Operator("^") -> 
+                ts.consume()
+                let ast_r = term ts
+                ast <- Ast.BinOp({NdBinOp.op=BinOpKind.BitXor; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
+            | TokenKind.Operator("%") -> 
+                ts.consume()
+                let ast_r = term ts
+                ast <- Ast.BinOp({NdBinOp.op=BinOpKind.Modulo; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })                
             | _ ->
                 finish <- true
         ast

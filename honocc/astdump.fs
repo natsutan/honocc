@@ -21,6 +21,21 @@ and write_binop(binop: NdBinOp, fp, node_num) =
                     | BinOpKind.Sub -> "SUB"
                     | BinOpKind.Mult -> "MUL"
                     | BinOpKind.Div -> "DIV"
+                    | BinOpKind.Equal -> "=="
+                    | BinOpKind.NotEqual -> "!="
+                    | BinOpKind.LesserThan -> ">"
+                    | BinOpKind.LesserEqual -> ">="
+                    | BinOpKind.GreaterThan -> "<"
+                    | BinOpKind.GreaterEqual -> "<="
+                    | BinOpKind.LShift -> "<<"
+                    | BinOpKind.RShift -> ">>"
+                    | BinOpKind.BitAnd -> "AND"
+                    | BinOpKind.LogicalAnd -> "LAND"
+                    | BinOpKind.BitOr -> "OR"
+                    | BinOpKind.LogicalOr -> "LOR"
+                    | BinOpKind.BitXor -> "XOR"
+                    | BinOpKind.Modulo -> "Modulo"
+
     let nn_op = node_num
     let nn_left = nn_op + 1
     let nn_right = write_ast(binop.l, fp, nn_left)
