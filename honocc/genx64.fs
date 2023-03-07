@@ -38,6 +38,26 @@ let rec gen_expr(fp, ast) =
                 fp.WriteLine "  cmp %rdi, %rax"
                 fp.WriteLine "  sete %al"
                 fp.WriteLine "  movzb %al, %rax"
+            | BinOpKind.NotEqual ->
+                fp.WriteLine "  cmp %rdi, %rax"
+                fp.WriteLine "  setne %al"
+                fp.WriteLine "  movzb %al, %rax"
+            | BinOpKind.LesserEqual ->
+                fp.WriteLine "  cmp %rdi, %rax"
+                fp.WriteLine "  setle %al"
+                fp.WriteLine "  movzb %al, %rax"
+            | BinOpKind.LesserThan ->
+                fp.WriteLine "  cmp %rdi, %rax"
+                fp.WriteLine "  setl %al"
+                fp.WriteLine "  movzb %al, %rax"
+            | BinOpKind.GreaterEqual ->
+                fp.WriteLine "  cmp %rdi, %rax"
+                fp.WriteLine "  setge %al"
+                fp.WriteLine "  movzb %al, %rax"
+            | BinOpKind.GreaterThan ->
+                fp.WriteLine "  cmp %rdi, %rax"
+                fp.WriteLine "  setg %al"
+                fp.WriteLine "  movzb %al, %rax"
             | _ -> failwith $"unsupported binop  %A{ast}"
     | _ -> failwith $"unsupported node  %A{ast}"
     

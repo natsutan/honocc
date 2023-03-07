@@ -82,19 +82,19 @@ and expr ts =
                 ts.consume()
                 let ast_r = term ts
                 ast <- Ast.BinOp({NdBinOp.op=BinOpKind.NotEqual; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
-            | TokenKind.Operator(">") -> 
-                ts.consume()
-                let ast_r = term ts
-                ast <- Ast.BinOp({NdBinOp.op=BinOpKind.LesserThan; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
-            | TokenKind.Operator(">=") -> 
-                ts.consume()
-                let ast_r = term ts
-                ast <- Ast.BinOp({NdBinOp.op=BinOpKind.LesserEqual; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
             | TokenKind.Operator("<") -> 
                 ts.consume()
                 let ast_r = term ts
-                ast <- Ast.BinOp({NdBinOp.op=BinOpKind.GreaterThan; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
+                ast <- Ast.BinOp({NdBinOp.op=BinOpKind.LesserThan; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
             | TokenKind.Operator("<=") -> 
+                ts.consume()
+                let ast_r = term ts
+                ast <- Ast.BinOp({NdBinOp.op=BinOpKind.LesserEqual; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
+            | TokenKind.Operator(">") -> 
+                ts.consume()
+                let ast_r = term ts
+                ast <- Ast.BinOp({NdBinOp.op=BinOpKind.GreaterThan; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
+            | TokenKind.Operator(">=") -> 
                 ts.consume()
                 let ast_r = term ts
                 ast <- Ast.BinOp({NdBinOp.op=BinOpKind.GreaterEqual; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
