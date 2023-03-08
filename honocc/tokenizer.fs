@@ -73,25 +73,25 @@ let rec private tokenize (input_str :string, filename : string, line : int, pos 
           | '!' ->
               match input_str[1] with
               | '=' -> createToken(TokenKind.Operator("!="), filename, line, pos) :: tokenize(input_str[2..], filename, line, pos + 2)
-              | _ -> createToken(TokenKind.Operator("!"), filename, line, pos) :: tokenize(input_str[2..], filename, line, pos + 1)
+              | _ -> createToken(TokenKind.Operator("!"), filename, line, pos) :: tokenize(input_str[1..], filename, line, pos + 1)
           | '<' ->
               match input_str[1] with
               | '<' -> createToken(TokenKind.Operator("<<"), filename, line, pos) :: tokenize(input_str[2..], filename, line, pos + 2)
               | '=' -> createToken(TokenKind.Operator("<="), filename, line, pos) :: tokenize(input_str[2..], filename, line, pos + 2)
-              | _ ->   createToken(TokenKind.Operator("<"), filename, line, pos) :: tokenize(input_str[2..], filename, line, pos + 1)
+              | _ ->   createToken(TokenKind.Operator("<"), filename, line, pos) :: tokenize(input_str[1..], filename, line, pos + 1)
           | '>' ->
               match input_str[1] with
               | '>' -> createToken(TokenKind.Operator(">>"), filename, line, pos) :: tokenize(input_str[2..], filename, line, pos + 2)
               | '=' -> createToken(TokenKind.Operator(">="), filename, line, pos) :: tokenize(input_str[2..], filename, line, pos + 2)
-              | _ ->   createToken(TokenKind.Operator(">"), filename, line, pos) :: tokenize(input_str[2..], filename, line, pos + 1)
+              | _ ->   createToken(TokenKind.Operator(">"), filename, line, pos) :: tokenize(input_str[1..], filename, line, pos + 1)
           | '|' ->
               match input_str[1] with
               | '|' -> createToken(TokenKind.Operator("||"), filename, line, pos) :: tokenize(input_str[2..], filename, line, pos + 2)
-              | _ ->   createToken(TokenKind.Operator("|"), filename, line, pos) :: tokenize(input_str[2..], filename, line, pos + 1)
+              | _ ->   createToken(TokenKind.Operator("|"), filename, line, pos) :: tokenize(input_str[1..], filename, line, pos + 1)
           | '&' ->
               match input_str[1] with
               | '&' -> createToken(TokenKind.Operator("&&"), filename, line, pos) :: tokenize(input_str[2..], filename, line, pos + 2)
-              | _ ->   createToken(TokenKind.Operator("&"), filename, line, pos) :: tokenize(input_str[2..], filename, line, pos + 1)
+              | _ ->   createToken(TokenKind.Operator("&"), filename, line, pos) :: tokenize(input_str[1..], filename, line, pos + 1)
           |  _ -> failwith $"unsupported char  %s{input_str}"
     
 

@@ -1,6 +1,7 @@
 module Genx86
 
 open System.IO
+open System.Numerics
 open Honodef
 
 let mutable stack_count = 0
@@ -34,6 +35,19 @@ let rec gen_expr(fp, ast) =
             | BinOpKind.Div ->
                 fp.WriteLine "  cqo"
                 fp.WriteLine "  idiv %rdi"
+            | BinOpKind.Modulo -> 
+                fp.WriteLine "  cdq"
+                fp.WriteLine "  idiv %rdi"
+                fp.WriteLine "  mov %rdx, %rax"
+            | BinOpKind.LShift ->
+                fp.WriteLine "  mov %rdi, %rcx"
+                fp.WriteLine "  shl %cl, %rax"
+            | BinOpKind.RShift ->
+                fp.WriteLine "  mov %rdi, %rcx"
+                fp.WriteLine "  shr %cl, %rax"
+            | BinOpKind.BitAnd -> fp.WriteLine "  and %rdi, %rax"
+            | BinOpKind.BitOr -> fp.WriteLine "  or %rdi, %rax"
+            | BinOpKind.BitXor -> fp.WriteLine "  xor %rdi, %rax"
             | BinOpKind.Equal ->
                 fp.WriteLine "  cmp %rdi, %rax"
                 fp.WriteLine "  sete %al"

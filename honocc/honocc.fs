@@ -36,11 +36,11 @@ let main args =
        
     // Tokenize
     let token_stream = Tokenizer.tokenizeFromFile filename
-    //token_stream.debPrintTokens()
+    token_stream.debPrintTokens()
 
     // Parse
     let func = Parser.parse token_stream
-    Astdump.dump(func, ast_dumpfile) |> ignore
+    //Astdump.dump(func, ast_dumpfile) |> ignore
     
     // Generate
     let asm_filename = toAsmFileName filename
