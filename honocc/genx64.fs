@@ -5,6 +5,12 @@ open System.Numerics
 open Honodef
 
 let mutable stack_count = 0
+let mutable label_count = 0
+
+let get_label_cnt =
+    let tmp = label_count
+    label_count <- label_count + 1
+    tmp
 
 let push (fp : StreamWriter) =
     stack_count <- stack_count + 1
@@ -72,6 +78,16 @@ let rec gen_expr(fp, ast) =
                 fp.WriteLine "  cmp %rdi, %rax"
                 fp.WriteLine "  setg %al"
                 fp.WriteLine "  movzb %al, %rax"
+            | BinOpKind.LogicalAnd ->
+                 fp.WriteLine "  and %rdi, %rax"
+                 fp.WriteLine "  cmp $0, %rax"
+                 fp.WriteLine "  setne %al"
+                 fp.WriteLine "  movzb %al, %rax"
+            | BinOpKind.LogicalOr ->
+                 fp.WriteLine "  or %rdi, %rax"
+                 fp.WriteLine "  cmp $0, %rax"
+                 fp.WriteLine "  setne %al"
+                 fp.WriteLine "  movzb %al, %rax"
             | _ -> failwith $"unsupported binop  %A{ast}"
     | _ -> failwith $"unsupported node  %A{ast}"
     
