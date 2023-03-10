@@ -40,7 +40,7 @@ let main args =
 
     // Parse
     let func = Parser.parse token_stream
-    //Astdump.dump(func, ast_dumpfile) |> ignore
+    Astdump.dump(func, ast_dumpfile) |> ignore
     
     // Generate
     let asm_filename = toAsmFileName filename

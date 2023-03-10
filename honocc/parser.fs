@@ -134,10 +134,10 @@ and expr ts =
                 finish <- true
         ast
     
-// term = factor { * factor }
-//        | factor { / factor }
+// term = unary { * unary }
+//        | unary { / unary }
 and term ts =
-    let mutable ast = factor ts
+    let mutable ast = unary ts
     let mutable finish = false
     
     while not finish do
@@ -145,15 +145,31 @@ and term ts =
         match token.Kind with
         | TokenKind.Operator("*") ->
             ts.consume()
-            let ast_r = factor ts
+            let ast_r = unary ts
             ast <- Ast.BinOp({NdBinOp.op=BinOpKind.Mult; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
         | TokenKind.Operator("/") ->
             ts.consume()
-            let ast_r = factor ts
+            let ast_r = unary ts
             ast <- Ast.BinOp({NdBinOp.op=BinOpKind.Div; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })          
         | _ ->
             finish <- true
     ast
+//
+// unary   = ("+" | "-")? factor
+and unary ts =
+    let token = ts.get()
+    match token.Kind with
+        | TokenKind.Operator("+") ->
+            ts.consume()
+            unary ts
+        | TokenKind.Operator("-") ->
+            ts.consume()
+            let node_r = unary ts
+            let node_l = Ast.Num({NdNum.Value=0; NdNum.Src=token.Src})
+            Ast.BinOp({NdBinOp.op=BinOpKind.Sub; NdBinOp.l=node_l; NdBinOp.r = node_r; NdBinOp.Src=token.Src })          
+        | _ ->
+            factor ts
+    
 // factor = num
 //        | ( expr )
 and factor ts =
