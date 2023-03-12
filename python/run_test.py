@@ -3,6 +3,7 @@ import glob
 import sys
 import subprocess
 import difflib
+import argparse
 
 CSRC_ROOT_DIR = "test/csrc"
 EXPECTED_ROOT_DIR = "test/expected"
@@ -140,11 +141,20 @@ def run_category_test(target, cat):
         record_test(target, result, cat, csrc)
 
 
-def run_test_all(target):
+def run_test_all(target, pattern=''):
     global total_test_cnt
     total_test_cnt = 0
     categories = os.listdir(path=CSRC_ROOT_DIR)
     categories.remove('common')
+
+    # パターンに一致したカテゴリーだけ実施する。
+    if pattern != '':
+        new_categories = []
+        for c in categories:
+            if pattern in c:
+                new_categories.append(c)
+        categories = new_categories
+
     print(categories)
 
     for cat in categories:
@@ -171,19 +181,26 @@ def report(target):
     print("ALL test (", target, ") finished passed(", passed, "/", total_test_cnt, ")")
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-t', '--target', default='all')
+    parser.add_argument('-p', '--pattern', default='')
+
+    args = parser.parse_args()
     pwd = os.getcwd()
     print("current dir = ", pwd)
 
     build_honocc()
 
-    print("---- start test for x64")
-    run_test_all('x64')
-    report('x64')
+    if args.target == 'all' or args.target == 'x64':
+        print("---- start test for x64")
+        run_test_all('x64', pattern=args.pattern)
+        report('x64')
 
     print("")
-    print("---- start test for riscv")
-    run_test_all('riscv')
-    report('riscv')
+    if args.target == 'all' or args.target == 'riscv':
+        print("---- start test for riscv")
+        run_test_all('riscv', pattern=args.pattern)
+        report('riscv')
 
 
 if __name__ == "__main__":
