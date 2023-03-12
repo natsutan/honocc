@@ -2,5 +2,10 @@
 /.idea/
 work/
 work_riscv/
-work_x86/
+work_x64/
 .fake
+python/.idea/
+a.out
+test/expected/
+
+
