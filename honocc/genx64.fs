@@ -79,6 +79,13 @@ let rec gen_expr(fp, ast) =
                 fp.WriteLine "  setg %al"
                 fp.WriteLine "  movzb %al, %rax"
             | BinOpKind.LogicalAnd ->
+                 fp.WriteLine "  cmp $0, %rax"
+                 fp.WriteLine "  setne %al"
+                 fp.WriteLine "  movzb %al, %rax"
+                 fp.WriteLine "  cmp $0, %rdi"
+                 fp.WriteLine "  setne %dil"
+                 fp.WriteLine "  movzb %dil, %rdi"
+                 
                  fp.WriteLine "  and %rdi, %rax"
                  fp.WriteLine "  cmp $0, %rax"
                  fp.WriteLine "  setne %al"
