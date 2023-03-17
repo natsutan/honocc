@@ -36,7 +36,7 @@ let main args =
        
     // Tokenize
     let token_stream = Tokenizer.tokenizeFromFile filename
-    token_stream.debPrintTokens()
+    //token_stream.debPrintTokens()
 
     // Parse
     let func = Parser.parse token_stream

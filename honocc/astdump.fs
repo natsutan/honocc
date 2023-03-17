@@ -4,18 +4,18 @@ open System.IO
 open Honodef
 
 
-let rec private write_funccall(funccall : NdFuncCall, fp, node_num) =
+let rec private write_funccall(funccall : NdFuncCall, fp, node_num, parent) =
     let func_name = funccall.Name
     let nn_func = node_num + 1
     let mutable nn_param = nn_func + 1
-    fprintfn fp $"\t%d{node_num} -->%d{nn_func}[CALL \\n %s{func_name}]"
+    fprintfn fp $"\t%d{parent} -->%d{nn_func}[CALL \\n %s{func_name}]"
     for p in funccall.Params do
         fprintfn fp $"\t%d{nn_func} -->|param| %d{nn_param}"    
-        let nn_new = write_ast(p, fp, nn_param)             
+        let nn_new = write_ast(p, fp, nn_param, nn_param)             
         nn_param <- nn_new
         
     nn_param
-and write_binop(binop: NdBinOp, fp, node_num) =
+and write_binop(binop: NdBinOp, fp, node_num, parent) =
     let op_name = match binop.op with
                     | BinOpKind.Add -> "ADD"
                     | BinOpKind.Sub -> "SUB"
@@ -38,8 +38,8 @@ and write_binop(binop: NdBinOp, fp, node_num) =
 
     let nn_op = node_num
     let nn_left = nn_op + 1
-    let nn_right = write_ast(binop.l, fp, nn_left)
-    let nn_next = write_ast(binop.r, fp, nn_right)
+    let nn_right = write_ast(binop.l, fp, nn_left, nn_left)
+    let nn_next = write_ast(binop.r, fp, nn_right, nn_right)
     fprintfn fp $"\t%d{nn_op}([%s{op_name}])"
     fprintfn fp $"\t%d{nn_op} --> %d{nn_left}"    
     fprintfn fp $"\t%d{nn_op} --> %d{nn_right}"    
@@ -50,13 +50,11 @@ and write_number(number : NdNum, fp, node_num) =
     fprintfn fp $"\t%d{node_num}([num:%d{value}])"
     node_num + 1
     
-and write_ast(ast, fp, node_num) =
-    let parent = node_num
-
+and write_ast(ast, fp, node_num, parent) =
     match ast with
     | Num(num) -> write_number(num, fp, node_num)
-    | FuncCall(fcall) -> write_funccall(fcall, fp, node_num)
-    | BinOp(binop) -> write_binop(binop, fp, node_num)
+    | FuncCall(fcall) -> write_funccall(fcall, fp, node_num, parent)
+    | BinOp(binop) -> write_binop(binop, fp, node_num, parent)
 
 let private write_function (ast : NdFunction, fp, node_num) =
     let name = ast.Name
@@ -66,7 +64,7 @@ let private write_function (ast : NdFunction, fp, node_num) =
     
     let mutable nn_block = nn_body + 1
     for b in ast.Body do
-        let nn_new = write_ast(b, fp, nn_block)
+        let nn_new = write_ast(b, fp, nn_block, nn_body+1)
         nn_block <- nn_new
     
     nn_block
