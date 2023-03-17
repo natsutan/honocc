@@ -15,19 +15,29 @@ let private skip(token_stream : TokenStream, token_kind : TokenKind) =
 
 // function = type identifier "(" type ")" "{" stmt "return" stmt "}"
 let rec p_function (ts : TokenStream) : NdFunction =
-     let token = ts.get()
+     let mutable body : Ast list = []
+     let mutable token = ts.get()
      p_type ts |> ignore
      let name = identifier ts
      skip(ts, TokenKind.LParen)
      p_type ts |> ignore
      skip(ts, TokenKind.RParen)
      skip(ts, TokenKind.LBrace)
-     let ast = stmt ts
+     
+     token <- ts.get()
+     while token.Kind <> TokenKind.Return do
+        let ast = stmt ts
+        body <- body @ [ast]
+        token <- ts.get()
+        if token.Kind = TokenKind.EOF then
+            let exp = ParseError(token, $"Parse Error unexpected EOF")
+            raise exp
+     
      skip(ts, TokenKind.Return)
      stmt ts |> ignore
      skip(ts, TokenKind.RBrace)
      
-     { Name = name; Body = [ast]; Src = token.Src }    
+     { Name = name; Body = body; Src = token.Src }    
 
 and identifier ts =
     let token = ts.get()

@@ -27,7 +27,8 @@ let private printTokens (tokens: Token List) =
      
 let rec private tokenize (input_str :string, filename : string, line : int, pos : int) =
     if input_str = "" then
-        [createToken(TokenKind.EOF, filename, line, pos)]
+        // lineが最終行を超えているところを指しているので１減らして最終行にする。
+        [createToken(TokenKind.EOF, filename, line-1, 0)]
     else
         let c = input_str[0]
         match c with
