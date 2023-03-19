@@ -59,6 +59,7 @@ type BinOpKind =
    
 [<StructuredFormatDisplay("{Display}")>]
 
+// Node
 type NdNum =
    { Value : int; Src :Coordinate }
    member private this.Display =
@@ -72,3 +73,10 @@ and Ast =
    | BinOp of NdBinOp
 
 type NdFunction = { Name : string ; Body : Ast list ; Src : Coordinate }
+
+// Variable
+type VType = INT | VOID
+
+[<StructuredFormatDisplay("{Display}")>]
+type Variable = { Name: string ; Type : VType ; Size : int  ; Local :bool ; Offset : int}
+

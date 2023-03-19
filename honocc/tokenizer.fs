@@ -70,7 +70,7 @@ let rec private tokenize (input_str :string, filename : string, line : int, pos 
               if input_str[1] = '=' then
                   createToken(TokenKind.Operator("=="), filename, line, pos) :: tokenize(input_str[2..], filename, line, pos + 2)
               else
-                failwith $"unsupported char  %s{input_str}"
+                createToken(TokenKind.Operator("="), filename, line, pos) :: tokenize(input_str[2..], filename, line, pos + 1)
           | '!' ->
               match input_str[1] with
               | '=' -> createToken(TokenKind.Operator("!="), filename, line, pos) :: tokenize(input_str[2..], filename, line, pos + 2)
@@ -100,13 +100,15 @@ type TokenStream(tokens_in : Token list) =
     let tokens = tokens_in
     let mutable p = 0
     member this.get() =
-        //printfn ($"TOKEN get %A{tokens.[p]}")
+        printfn ($"TOKEN get %A{tokens.[p]}")
         tokens.[p]
     member this.consume() =
         p <- p + 1
     member this.debPrintTokens() =
         printTokens tokens
     
+    member this.peek(n) = 
+        tokens.[p+n]
 
 let tokenizeFromFile (filename  :string) =
     printfn $"Open %s{filename}"
