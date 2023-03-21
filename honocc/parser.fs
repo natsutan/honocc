@@ -118,29 +118,56 @@ and stmt(ts, fn) =
 and declaration(ts, fn) =
     ()
     
-// expr = logicaland { || logicaland　}
+// expr = assign
 //       | putd
 and expr (ts, fn) =
     let token = ts.get()
-    if token.Kind = TokenKind.DebPutd then
+    match token.Kind with
+    | TokenKind.DebPutd ->
          ts.consume()
          putd (ts, fn)
-    else        
-        let mutable ast = logicaland (ts, fn)
-        let mutable finish = false
-        
+    | _ ->
+        assign(ts, fn)
+
+// assign = variavle { =  locicalor　}
+//          | locicalor
+and assign (ts, fn) =
+    let token = ts.get()
+    let mutable finish = false
+    match token.Kind with
+    | TokenKind.Identifier(name) ->
+        let mutable ast = factor(ts, fn)
         while not finish do
             let token = ts.get()
             match token.Kind with
-            | TokenKind.Operator("||") -> 
+            | TokenKind.Operator("=") -> 
                 ts.consume()
-                let ast_r = logicaland (ts, fn)
-                ast <- Ast.BinOp({NdBinOp.op=BinOpKind.LogicalOr; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
+                let ast_r = logicalor(ts, fn)
+                ast <- Ast.BinOp({NdBinOp.op=BinOpKind.Assign; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
             | _ ->
                 finish <- true
         ast
-// logicaland = bitwiseor { && bitwiseor　}
+        
+    | _ ->  logicalor(ts, fn)
+    
+// logicalor = logicaland { ||  logicaland　}
 
+and logicalor(ts, fn) = 
+    let mutable ast = logicaland(ts, fn)
+    let mutable finish = false
+    
+    while not finish do
+        let token = ts.get()
+        match token.Kind with
+        | TokenKind.Operator("||") -> 
+            ts.consume()
+            let ast_r = logicaland(ts, fn)
+            ast <- Ast.BinOp({NdBinOp.op=BinOpKind.LogicalOr; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
+        | _ ->
+            finish <- true
+    ast
+
+// logicaland = bitwiseor { && bitwiseor　}
 and logicaland(ts, fn) =
     let mutable ast = bitwiseor(ts, fn)
     let mutable finish = false
@@ -337,12 +364,18 @@ and unary(ts, fn) =
             factor(ts, fn)
     
 // factor = num
+//        | variable
 //        | ( expr )
 and factor(ts, fn) =
     let token = ts.get()
     ts.consume()
     match token.Kind with
     | TokenKind.Integer(n) -> Ast.Num({NdNum.Value=n; NdNum.Src=token.Src})
+    | TokenKind.Identifier(name) ->
+        match fn.hasVariable(name) with
+        | true -> Ast.Variable({NdVariable.Name=name; NdVariable.Src=token.Src})
+        | false -> raise(ParseError(token, $"unknown variable %s{name}"))
+            
     | TokenKind.LParen ->
         let ast = expr(ts, fn)
         skip(ts, TokenKind.RParen)

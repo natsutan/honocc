@@ -56,6 +56,7 @@ type BinOpKind =
    | LogicalOr
    | BitXor
    | Modulo
+   | Assign
    
 [<StructuredFormatDisplay("{Display}")>]
 
@@ -67,10 +68,12 @@ type NdNum =
    
 type NdFuncCall = { Name :string; Params : Ast list ; Src : Coordinate }
 and NdBinOp = { op : BinOpKind; l : Ast; r : Ast ; Src : Coordinate  }
+and NdVariable = { Name :string; Src :Coordinate }
 and Ast =
    | Num of NdNum
    | FuncCall of NdFuncCall
    | BinOp of NdBinOp
+   | Variable of NdVariable
 
 type NdFunction = { Name : string ; Body : Ast list ; Src : Coordinate }
 
