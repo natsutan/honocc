@@ -87,7 +87,7 @@ let gen_body(fp, asts: Ast list) =
         | _ -> failwith $"unsupported node  %A{ast}"
 
 
-let generate(asm_file_path : string,  fn : Environment.Function)=
+let generate(asm_file_path : string,  fn : Honoenv.Function)=
      let fp = new StreamWriter(asm_file_path)
      
      match fn.NdFunction with

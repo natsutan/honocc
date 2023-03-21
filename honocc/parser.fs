@@ -32,34 +32,39 @@ let is_definition(ts : TokenStream) : bool =
     
 
 // definition = type identifier
-let definition(ts : TokenStream)=
+let definition(ts : TokenStream, fn : Honoenv.Function)=
     // 変数の型
-    let vtoken = ts.get()
-    let vtype = match vtoken.Kind with
+    let token_t = ts.get()
+    let vtype = match token_t.Kind with
                 | TokenKind.Int -> VType.INT
                 | _ ->
-                    let exp = ParseError(vtoken, $"Parse Error token must be int ")
+                    let exp = ParseError(token_t, $"Parse Error token must be int ")
                     raise exp
     ts.consume()
-    skip(ts, TokenKind.Operator("="))
     
     //　変数名
-    let vname = ts.get()
-    match vname.Kind with
+    let token_n = ts.get()
+    
+    match token_n.Kind with
     | TokenKind.Identifier(name) ->
+        if fn.hasVariable(name) then
+            let exp = ParseError(token_n, $"Parse Error variable %s{name} already defined ")
+            raise exp
+        
         ts.consume()
         let variable : Variable = {Name = name; Type = vtype; Size = 8; Local = true ; Offset = 0}
-        locals <- locals @ [variable]
+        fn.addVariable(variable)
     | _ ->
-        let exp = ParseError(vname, $"Parse Error token must be variable name ")
+        let exp = ParseError(token_n, $"Parse Error token must be variable name ")
         raise exp
     
+    skip(ts, TokenKind.SemiColon)
 
 // function = type identifier "(" type ")" "{" stmt "return" stmt "}"
-let rec p_function (ts : TokenStream) : Environment.Function =
+let rec p_function (ts : TokenStream) : Honoenv.Function =
      let mutable body : Ast list = []
      let mutable token = ts.get()
-     let mutable fn = Environment.Function("main") 
+     let mutable fn = Honoenv.Function("main") 
      
      p_type (ts, fn) |> ignore
      let name = identifier(ts, fn)
@@ -103,9 +108,9 @@ and p_type(ts, fn) =
 //stmt = expr ";"
 and stmt(ts, fn) =
     // 変数宣言のみの時はASTを作らない
-    //while is_definition ts do
-    //    locals <- definition(ts, locals) 
-    
+    while is_definition ts do
+        definition(ts, fn) 
+        
     
     let ast = expr (ts, fn)
     skip(ts, TokenKind.SemiColon)
