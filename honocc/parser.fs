@@ -56,21 +56,21 @@ let definition(ts : TokenStream)=
     
 
 // function = type identifier "(" type ")" "{" stmt "return" stmt "}"
-let rec p_function (ts : TokenStream) : NdFunction =
+let rec p_function (ts : TokenStream) : Environment.Function =
      let mutable body : Ast list = []
      let mutable token = ts.get()
-     locals <- []
+     let mutable fn = Environment.Function("main") 
      
-     p_type ts |> ignore
-     let name = identifier ts
+     p_type (ts, fn) |> ignore
+     let name = identifier(ts, fn)
      skip(ts, TokenKind.LParen)
-     p_type ts |> ignore
+     p_type (ts, fn) |> ignore
      skip(ts, TokenKind.RParen)
      skip(ts, TokenKind.LBrace)
      
      token <- ts.get()
      while token.Kind <> TokenKind.Return do
-        let ast = stmt ts
+        let ast = stmt (ts, fn)
         body <- body @ [ast]
         token <- ts.get()
         if token.Kind = TokenKind.EOF then
@@ -78,12 +78,13 @@ let rec p_function (ts : TokenStream) : NdFunction =
             raise exp
      
      skip(ts, TokenKind.Return)
-     stmt ts |> ignore
+     stmt(ts, fn) |> ignore
      skip(ts, TokenKind.RBrace)
      
-     { Name = name; Body = body; Src = token.Src }    
+     fn.NdFunction <- Some({ Name = name; Body = body; Src = token.Src })
+     fn
 
-and identifier ts =
+and identifier(ts, fn) =
     let token = ts.get()
     ts.consume()
     match token.Kind with
@@ -92,7 +93,7 @@ and identifier ts =
     
 // type = void
 //      | int 
-and p_type ts =
+and p_type(ts, fn) =
     let token = ts.get()
     ts.consume()
     match token.Kind with
@@ -100,27 +101,27 @@ and p_type ts =
     | TokenKind.Void -> TokenKind.Void
     | _ -> raise(ParseError(token, $"token must be type"))
 //stmt = expr ";"
-and stmt ts =
+and stmt(ts, fn) =
     // 変数宣言のみの時はASTを作らない
     //while is_definition ts do
     //    locals <- definition(ts, locals) 
     
     
-    let ast = expr ts
+    let ast = expr (ts, fn)
     skip(ts, TokenKind.SemiColon)
     ast
-and declaration ts =
+and declaration(ts, fn) =
     ()
     
 // expr = logicaland { || logicaland　}
 //       | putd
-and expr ts =
+and expr (ts, fn) =
     let token = ts.get()
     if token.Kind = TokenKind.DebPutd then
          ts.consume()
-         putd ts
+         putd (ts, fn)
     else        
-        let mutable ast = logicaland ts
+        let mutable ast = logicaland (ts, fn)
         let mutable finish = false
         
         while not finish do
@@ -128,15 +129,15 @@ and expr ts =
             match token.Kind with
             | TokenKind.Operator("||") -> 
                 ts.consume()
-                let ast_r = logicaland ts
+                let ast_r = logicaland (ts, fn)
                 ast <- Ast.BinOp({NdBinOp.op=BinOpKind.LogicalOr; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
             | _ ->
                 finish <- true
         ast
 // logicaland = bitwiseor { && bitwiseor　}
 
-and logicaland ts =
-    let mutable ast = bitwiseor ts
+and logicaland(ts, fn) =
+    let mutable ast = bitwiseor(ts, fn)
     let mutable finish = false
     
     while not finish do
@@ -144,15 +145,15 @@ and logicaland ts =
         match token.Kind with
         | TokenKind.Operator("&&") -> 
             ts.consume()
-            let ast_r = bitwiseor ts
+            let ast_r = bitwiseor(ts, fn)
             ast <- Ast.BinOp({NdBinOp.op=BinOpKind.LogicalAnd; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
         | _ ->
             finish <- true
     ast
 // bitwiseor = bitwisexor { | bitwisexor　}
 
-and bitwiseor ts =
-    let mutable ast = bitwisexor ts
+and bitwiseor(ts, fn) =
+    let mutable ast = bitwisexor (ts, fn)
     let mutable finish = false
     
     while not finish do
@@ -160,15 +161,15 @@ and bitwiseor ts =
         match token.Kind with
         | TokenKind.Operator("|") -> 
             ts.consume()
-            let ast_r = bitwisexor ts
+            let ast_r = bitwisexor(ts, fn)
             ast <- Ast.BinOp({NdBinOp.op=BinOpKind.BitOr; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
         | _ ->
             finish <- true
     ast
 // bitwisexor = bitwiseand { ^ bitwiseand　}
 
-and bitwisexor ts =
-    let mutable ast = bitwiseand ts
+and bitwisexor(ts, fn) =
+    let mutable ast = bitwiseand(ts, fn)
     let mutable finish = false
     
     while not finish do
@@ -176,15 +177,15 @@ and bitwisexor ts =
         match token.Kind with
         | TokenKind.Operator("^") -> 
             ts.consume()
-            let ast_r = bitwiseand ts
+            let ast_r = bitwiseand(ts, fn)
             ast <- Ast.BinOp({NdBinOp.op=BinOpKind.BitXor; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
         | _ ->
             finish <- true
     ast
 // bitwiseand = equality { & equality　}
 
-and bitwiseand ts =
-    let mutable ast = equality ts
+and bitwiseand (ts, fn) =
+    let mutable ast = equality (ts, fn)
     let mutable finish = false
     
     while not finish do
@@ -192,7 +193,7 @@ and bitwiseand ts =
         match token.Kind with
         | TokenKind.Operator("&") -> 
             ts.consume()
-            let ast_r = equality ts
+            let ast_r = equality(ts, fn)
             ast <- Ast.BinOp({NdBinOp.op=BinOpKind.BitAnd; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
         | _ ->
             finish <- true
@@ -200,8 +201,8 @@ and bitwiseand ts =
 // equality = relational { == relational　}
 //            relational { != relational }
 
-and equality ts =
-    let mutable ast = relational ts
+and equality(ts, fn) =
+    let mutable ast = relational(ts, fn)
     let mutable finish = false
     
     while not finish do
@@ -209,11 +210,11 @@ and equality ts =
         match token.Kind with
         | TokenKind.Operator("==") -> 
             ts.consume()
-            let ast_r = relational ts
+            let ast_r = relational(ts, fn)
             ast <- Ast.BinOp({NdBinOp.op=BinOpKind.Equal; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
         | TokenKind.Operator("!=") -> 
             ts.consume()
-            let ast_r = relational ts
+            let ast_r = relational(ts, fn)
             ast <- Ast.BinOp({NdBinOp.op=BinOpKind.NotEqual; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
         | _ ->
             finish <- true
@@ -223,8 +224,8 @@ and equality ts =
 //              shifting { >= shifting }
 //              shifting { <= shifting }
 
-and relational ts =
-    let mutable ast = shifting ts
+and relational(ts, fn) =
+    let mutable ast = shifting(ts, fn)
     let mutable finish = false
     
     while not finish do
@@ -232,19 +233,19 @@ and relational ts =
         match token.Kind with
         | TokenKind.Operator("<") -> 
             ts.consume()
-            let ast_r = shifting ts
+            let ast_r = shifting (ts, fn)
             ast <- Ast.BinOp({NdBinOp.op=BinOpKind.LesserThan; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
         | TokenKind.Operator("<=") -> 
             ts.consume()
-            let ast_r = shifting ts
+            let ast_r = shifting (ts, fn)
             ast <- Ast.BinOp({NdBinOp.op=BinOpKind.LesserEqual; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
         | TokenKind.Operator(">") -> 
             ts.consume()
-            let ast_r = shifting ts
+            let ast_r = shifting (ts, fn)
             ast <- Ast.BinOp({NdBinOp.op=BinOpKind.GreaterThan; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
         | TokenKind.Operator(">=") -> 
             ts.consume()
-            let ast_r = shifting ts
+            let ast_r = shifting (ts, fn)
             ast <- Ast.BinOp({NdBinOp.op=BinOpKind.GreaterEqual; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
         | _ ->
             finish <- true
@@ -252,8 +253,8 @@ and relational ts =
 // shifting = additive { << additive　}
 //            additive { >> additive }
 
-and shifting ts =
-    let mutable ast = additive ts
+and shifting(ts, fn) =
+    let mutable ast = additive(ts, fn)
     let mutable finish = false
     
     while not finish do
@@ -261,18 +262,18 @@ and shifting ts =
         match token.Kind with
         | TokenKind.Operator("<<") -> 
                 ts.consume()
-                let ast_r = additive ts
+                let ast_r = additive(ts, fn)
                 ast <- Ast.BinOp({NdBinOp.op=BinOpKind.LShift; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
         | TokenKind.Operator(">>") -> 
                 ts.consume()
-                let ast_r = additive ts
+                let ast_r = additive (ts, fn)
                 ast <- Ast.BinOp({NdBinOp.op=BinOpKind.RShift; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
         | _ ->
             finish <- true
     ast
 
-and additive ts =
-    let mutable ast = term ts
+and additive(ts, fn) =
+    let mutable ast = term(ts, fn)
     let mutable finish = false
     
     while not finish do
@@ -280,11 +281,11 @@ and additive ts =
         match token.Kind with
         | TokenKind.Operator("+") -> 
             ts.consume()
-            let ast_r = term ts
+            let ast_r = term(ts, fn)
             ast <- Ast.BinOp({NdBinOp.op=BinOpKind.Add; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
         | TokenKind.Operator("-") -> 
             ts.consume()
-            let ast_r = term ts
+            let ast_r = term(ts, fn)
             ast <- Ast.BinOp({NdBinOp.op=BinOpKind.Sub; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
         | _ ->
             finish <- true
@@ -292,8 +293,8 @@ and additive ts =
         
 // term = unary { * unary }
 //        | unary { / unary }
-and term ts =
-    let mutable ast = unary ts
+and term(ts, fn) =
+    let mutable ast = unary(ts, fn)
     let mutable finish = false
     
     while not finish do
@@ -301,53 +302,53 @@ and term ts =
         match token.Kind with
         | TokenKind.Operator("*") ->
             ts.consume()
-            let ast_r = unary ts
+            let ast_r = unary(ts, fn)
             ast <- Ast.BinOp({NdBinOp.op=BinOpKind.Mult; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
         | TokenKind.Operator("/") ->
             ts.consume()
-            let ast_r = unary ts
+            let ast_r = unary(ts, fn)
             ast <- Ast.BinOp({NdBinOp.op=BinOpKind.Div; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
         | TokenKind.Operator("%") -> 
             ts.consume()
-            let ast_r = unary ts
+            let ast_r = unary(ts, fn)
             ast <- Ast.BinOp({NdBinOp.op=BinOpKind.Modulo; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })                
         | _ ->
             finish <- true
     ast
 //
 // unary   = ("+" | "-")? factor
-and unary ts =
+and unary(ts, fn) =
     let token = ts.get()
     match token.Kind with
         | TokenKind.Operator("+") ->
             ts.consume()
-            unary ts
+            unary(ts, fn)
         | TokenKind.Operator("-") ->
             ts.consume()
-            let node_r = unary ts
+            let node_r = unary(ts, fn)
             let node_l = Ast.Num({NdNum.Value=0; NdNum.Src=token.Src})
             Ast.BinOp({NdBinOp.op=BinOpKind.Sub; NdBinOp.l=node_l; NdBinOp.r = node_r; NdBinOp.Src=token.Src })          
         | _ ->
-            factor ts
+            factor(ts, fn)
     
 // factor = num
 //        | ( expr )
-and factor ts =
+and factor(ts, fn) =
     let token = ts.get()
     ts.consume()
     match token.Kind with
     | TokenKind.Integer(n) -> Ast.Num({NdNum.Value=n; NdNum.Src=token.Src})
     | TokenKind.LParen ->
-        let ast = expr ts
+        let ast = expr(ts, fn)
         skip(ts, TokenKind.RParen)
         ast
     | _ -> raise(ParseError(token, $"token must be expr"))
 //一時的
 //putd = "putd" "(" expr ")" 
-and putd ts =
+and putd(ts, fn) =
     let token = ts.get()
     skip(ts, TokenKind.LParen)    
-    let parameters = expr ts
+    let parameters = expr(ts, fn)
     skip(ts, TokenKind.RParen)    
     Ast.FuncCall({NdFuncCall.Name = "putd"; NdFuncCall.Params = [parameters]; NdFuncCall.Src=token.Src })
 

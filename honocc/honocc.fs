@@ -40,7 +40,10 @@ let main args =
 
     // Parse
     let func = Parser.parse token_stream
-    Astdump.dump(func, ast_dumpfile) |> ignore
+    match func.NdFunction with
+    | Some(n) -> Astdump.dump(n, ast_dumpfile)
+    | _ -> 0
+    |> ignore
     
     // Generate
     let asm_filename = toAsmFileName filename

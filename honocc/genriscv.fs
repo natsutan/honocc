@@ -87,33 +87,36 @@ let gen_body(fp, asts: Ast list) =
         | _ -> failwith $"unsupported node  %A{ast}"
 
 
-let generate(asm_file_path : string,  func : NdFunction)=
+let generate(asm_file_path : string,  fn : Environment.Function)=
      let fp = new StreamWriter(asm_file_path)
      
-     fp.WriteLine $".globl {func.Name}"
-     fp.WriteLine ".text"
-     fp.WriteLine $"{func.Name}:"
+     match fn.NdFunction with
+     | Some(func) ->
+         fp.WriteLine $".globl {func.Name}"
+         fp.WriteLine ".text"
+         fp.WriteLine $"{func.Name}:"
 
-     fp.WriteLine "# Prologue"    
-     fp.WriteLine "  addi    sp,sp,-16"        
-     fp.WriteLine "  sd      ra,8(sp)"
-     fp.WriteLine "  sd      s0,0(sp)"
-     fp.WriteLine "  addi    s0,sp,16"
-     fp.WriteLine ""  
+         fp.WriteLine "# Prologue"    
+         fp.WriteLine "  addi    sp,sp,-16"        
+         fp.WriteLine "  sd      ra,8(sp)"
+         fp.WriteLine "  sd      s0,0(sp)"
+         fp.WriteLine "  addi    s0,sp,16"
+         fp.WriteLine ""  
+         
+         gen_body(fp, func.Body)  |> ignore
+         assert (stack_count = 0)
+         
+         fp.WriteLine "# Epilogue"
+         
+         fp.WriteLine $".L.return.%s{func.Name}:"        
+         fp.WriteLine "  li      a0, 0"
+         fp.WriteLine "  ld      ra,8(sp)"  
+         fp.WriteLine "  ld      s0,0(sp)"  
+         fp.WriteLine "  addi    sp,sp,16"  
+         fp.WriteLine "  jr      ra"  
+         fp.WriteLine ""  
+     | _ -> ()
      
-     gen_body(fp, func.Body)  |> ignore
-     assert (stack_count = 0)
-     
-     fp.WriteLine "# Epilogue"
-     
-     fp.WriteLine $".L.return.%s{func.Name}:"        
-     fp.WriteLine "  li      a0, 0"
-     fp.WriteLine "  ld      ra,8(sp)"  
-     fp.WriteLine "  ld      s0,0(sp)"  
-     fp.WriteLine "  addi    sp,sp,16"  
-     fp.WriteLine "  jr      ra"  
-     fp.WriteLine ""  
-
      fp.Close()
      
 

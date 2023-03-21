@@ -80,3 +80,5 @@ type VType = INT | VOID
 [<StructuredFormatDisplay("{Display}")>]
 type Variable = { Name: string ; Type : VType ; Size : int  ; Local :bool ; Offset : int}
 
+
+// 関数用クラス
