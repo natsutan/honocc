@@ -143,6 +143,13 @@ let gen_body(fp, asts: Ast list, fn) =
         | Ast.BinOp(_) -> gen_expr(fp, ast, fn)
         | _ -> failwith $"unsupported node  %A{ast}"
     
+//スタックサイズを32の倍数にする
+let align_stack(stack_size):int =
+    //stack_sizeを32の倍数に切り上げる
+    let aligned_stack_size = (stack_size + 31) / 32 * 32
+    aligned_stack_size
+    
+
 
 let generate(asm_file_path : string,  fn : Honoenv.Function)=
      let fp = new StreamWriter(asm_file_path)
@@ -154,11 +161,13 @@ let generate(asm_file_path : string,  fn : Honoenv.Function)=
          fp.WriteLine $".globl {func.Name}"
          fp.WriteLine ".text"
          fp.WriteLine $"{func.Name}:"
+         
+         let aligned_stack_size = align_stack(fn.stackSize)
 
          fp.WriteLine "# Prologue"    
          fp.WriteLine "  push %rbp"        //ベースポインタを保存
          fp.WriteLine "  mov %rsp, %rbp"     //ベースポインタに関数に入った時のスタックポインタを保存
-         fp.WriteLine $"  sub $%d{fn.stackSize}, %%rsp"     //変数の領域確保
+         fp.WriteLine $"  sub $%d{aligned_stack_size}, %%rsp"     //変数の領域確保
          fp.WriteLine ""  
          
          gen_body(fp, func.Body, fn)  |> ignore
