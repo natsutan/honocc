@@ -426,7 +426,8 @@ and factor(ts, fn) =
 and putd(ts, fn) =
     let token = ts.get()
     skip(ts, TokenKind.LParen)    
-    let parameters = expr(ts, fn)
+//    let parameters = expr(ts, fn)
+    let parameters = logicalor(ts, fn)
     skip(ts, TokenKind.RParen)    
     Ast.FuncCall({NdFuncCall.Name = "putd"; NdFuncCall.Params = [parameters]; NdFuncCall.Src=token.Src })
 
