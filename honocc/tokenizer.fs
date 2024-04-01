@@ -33,6 +33,7 @@ let rec private tokenize (input_str :string, filename : string, line : int, pos 
         let c = input_str[0]
         match c with
           | ' ' -> tokenize(input_str[1..], filename, line, pos + 1)
+          | '\r' -> tokenize(input_str[1..], filename, line + 1, 0)
           | '\n' -> tokenize(input_str[1..], filename, line + 1, 0)
           | '('  -> createToken(TokenKind.LParen, filename, line, pos) :: tokenize(input_str[1..], filename, line, pos + 1)
           | ')'  -> createToken(TokenKind.RParen, filename, line, pos) :: tokenize(input_str[1..], filename, line, pos + 1)
@@ -100,7 +101,7 @@ type TokenStream(tokens_in : Token list) =
     let tokens = tokens_in
     let mutable p = 0
     member this.get() =
-        printfn ($"TOKEN get %A{tokens.[p]}")
+//        printfn ($"TOKEN get %A{tokens.[p]}")
         tokens.[p]
     member this.consume() =
         p <- p + 1

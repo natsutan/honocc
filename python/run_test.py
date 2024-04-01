@@ -8,7 +8,7 @@ import argparse
 CSRC_ROOT_DIR = "test/csrc"
 EXPECTED_ROOT_DIR = "test/expected"
 BUILD_DIR = 'honocc'
-COMPILER_PATH = 'honocc/bin/Debug/net6.0/honocc'
+COMPILER_PATH = 'honocc/bin/Debug/net6.0/honocc.exe'
 
 total_test_cnt = 0
 x64_passed = 0
@@ -189,7 +189,7 @@ def main():
     pwd = os.getcwd()
     print("current dir = ", pwd)
 
-    build_honocc()
+    # build_honocc()
 
     if args.target == 'all' or args.target == 'x64':
         print("---- start test for x64")

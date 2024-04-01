@@ -29,7 +29,23 @@ let is_definition(ts : TokenStream) : bool =
     | TokenKind.Void | TokenKind.Int ->
         ck_definition(ts, 1)            
     | _ -> false
-    
+
+let is_type(token: Token) : bool =
+    match token.Kind with
+    | TokenKind.Void | TokenKind.Int -> true
+    | _ -> false
+
+let add_variable (ts : TokenStream, fn : Honoenv.Function, vtype: VType) : Variable  =
+    let token = ts.get()
+    match token.Kind with
+    | TokenKind.Identifier(name) ->
+        if fn.hasVariable(name) then
+            let exp = ParseError(token, $"Parse Error variable %s{name} already defined ")
+            raise exp
+        ts.consume()
+        Ast.Variable({NdVariable.Name=name; NdVariable.Src=token.Src}) |> ignore
+        {Name = name; Type = vtype; Size = 8; Local = true ; Offset = 0}
+    | _ -> raise(ParseError(token, $"token must be variable"))
 
 // definition = type identifier
 let definition(ts : TokenStream, fn : Honoenv.Function)=
@@ -47,18 +63,13 @@ let definition(ts : TokenStream, fn : Honoenv.Function)=
     
     match token_n.Kind with
     | TokenKind.Identifier(name) ->
-        if fn.hasVariable(name) then
-            let exp = ParseError(token_n, $"Parse Error variable %s{name} already defined ")
-            raise exp
-        
-        ts.consume()
-        let variable : Variable = {Name = name; Type = vtype; Size = 8; Local = true ; Offset = 0}
+        let variable  = add_variable(ts, fn, vtype)
         fn.addVariable(variable)
     | _ ->
         let exp = ParseError(token_n, $"Parse Error token must be variable name ")
         raise exp
     
-    skip(ts, TokenKind.SemiColon)
+    
 
 // function = type identifier "(" type ")" "{" stmt "return" stmt "}"
 let rec p_function (ts : TokenStream) : Honoenv.Function =
@@ -106,13 +117,42 @@ and p_type(ts, fn) =
     | TokenKind.Void -> TokenKind.Void
     | _ -> raise(ParseError(token, $"token must be type"))
 //stmt = expr ";"
+//     = type identifier = expr ";"
 and stmt(ts, fn) =
     // 変数宣言のみの時はASTを作らない
     while is_definition ts do
-        definition(ts, fn) 
+        definition(ts, fn)
+        skip(ts, TokenKind.SemiColon)
         
+    let token = ts.get()
+    if is_type token then
+        //宣言と同時に代入パターン
+        def_assign_stmt(ts, fn)
+    else
+        //exer
+        stmt2(ts, fn)
+and def_assign_stmt(ts, fn) =
+    // 変数の型  
+    let token_t = ts.get()  
+    let vtype = match token_t.Kind with  
+                | TokenKind.Int -> VType.INT  
+                | _ ->  
+                    let exp = ParseError(token_t, $"Parse Error token must be int ")  
+                    raise exp  
+    ts.consume()  
+      
+    //　変数名
+    let token_n = ts.get()
+    let variable : Variable = add_variable(ts, fn, vtype)
+    fn.addVariable(variable)  
+    skip(ts, TokenKind.Operator("="))
+    let ast = expr(ts, fn)    
+    let ast_binop = Ast.BinOp({NdBinOp.op=BinOpKind.Assign; NdBinOp.l=Ast.Variable({NdVariable.Name=variable.Name; NdVariable.Src=token_n.Src}); NdBinOp.r = ast; NdBinOp.Src=token_n.Src })
+    skip(ts, TokenKind.SemiColon)
+    ast_binop
     
-    let ast = expr (ts, fn)
+and stmt2(ts, fn) =
+    let ast = expr(ts, fn)
     skip(ts, TokenKind.SemiColon)
     ast
 and declaration(ts, fn) =
