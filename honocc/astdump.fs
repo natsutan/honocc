@@ -10,12 +10,12 @@ let rec private write_funccall(funccall : NdFuncCall, fp, node_num, parent) =
     let mutable nn_param = nn_func + 1
     fprintfn fp $"\t%d{parent} -->%d{nn_func}[CALL \\n %s{func_name}]"
     for p in funccall.Params do
-        fprintfn fp $"\t%d{nn_func} -->|param| %d{nn_param}"    
-        let nn_new = write_ast(p, fp, nn_param, nn_param)             
+//        fprintfn fp $"\t%d{nn_func} -->|param| %d{nn_param}"    
+        let nn_new = write_ast(p, fp, nn_param, nn_func, "|param|")             
         nn_param <- nn_new
-        
     nn_param
-and write_binop(binop: NdBinOp, fp, node_num, parent) =
+
+and write_binop(binop: NdBinOp, fp, node_num, parent, label) =
     let op_name = match binop.op with
                     | BinOpKind.Add -> "ADD"
                     | BinOpKind.Sub -> "SUB"
@@ -39,29 +39,31 @@ and write_binop(binop: NdBinOp, fp, node_num, parent) =
 
     let nn_op = node_num
     let nn_left = nn_op + 1
-    let nn_right = write_ast(binop.l, fp, nn_left, nn_left)
-    let nn_next = write_ast(binop.r, fp, nn_right, nn_right)
-    fprintfn fp $"\t%d{parent} -->%d{nn_op}"
+    let nn_right = write_ast(binop.l, fp, nn_left, nn_op, "")
+    let nn_next = write_ast(binop.r, fp, nn_right, nn_op, "")
+    fprintfn fp $"\t%d{parent} -->%s{label}%d{nn_op}"
     fprintfn fp $"\t%d{nn_op}([%s{op_name}])"
-    fprintfn fp $"\t%d{nn_op} --> %d{nn_left}"    
-    fprintfn fp $"\t%d{nn_op} --> %d{nn_right}"    
+    //fprintfn fp $"\t%d{nn_op} --> %d{nn_left}"    
+    //fprintfn fp $"\t%d{nn_op} --> %d{nn_right}"    
     
     nn_next
-and write_number(number : NdNum, fp, node_num) =
+and write_number(number : NdNum, fp, node_num, parent, label) =
     let value = number.Value
     fprintfn fp $"\t%d{node_num}([num:%d{value}])"
+    fprintfn fp $"\t%d{parent} -->%s{label}%d{node_num}"
     node_num + 1
-and write_variable(v: NdVariable, fp, node_num) =
+and write_variable(v: NdVariable, fp, node_num, parent, label) =
     let name = v.Name
     fprintfn fp $"\t%d{node_num}([variable:%s{name}])"
+    fprintfn fp $"\t%d{parent} -->%s{label}%d{node_num}"
     node_num + 1
     
-and write_ast(ast, fp, node_num, parent) =
+and write_ast(ast, fp, node_num, parent, label) =
     match ast with
-    | Num(num) -> write_number(num, fp, node_num)
-    | Variable(v) -> write_variable(v, fp, node_num)
+    | Num(num) -> write_number(num, fp, node_num, parent, label)
+    | Variable(v) -> write_variable(v, fp, node_num, parent, label)
     | FuncCall(fcall) -> write_funccall(fcall, fp, node_num, parent)
-    | BinOp(binop) -> write_binop(binop, fp, node_num, parent)
+    | BinOp(binop) -> write_binop(binop, fp, node_num, parent, label)
 
 let private write_function (ast : NdFunction, fp, node_num) =
     let name = ast.Name
@@ -71,7 +73,7 @@ let private write_function (ast : NdFunction, fp, node_num) =
     
     let mutable nn_block = nn_body
     for b in ast.Body do
-        let nn_new = write_ast(b, fp, nn_block+1, nn_body)
+        let nn_new = write_ast(b, fp, nn_block+1, nn_body, "")
         nn_block <- nn_new
     
     nn_block

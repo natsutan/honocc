@@ -9,3 +9,6 @@ a.out
 test/expected/
 
 
+/.vs
+/.vscode
+honocc/.vs
