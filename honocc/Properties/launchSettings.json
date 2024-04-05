@@ -3,7 +3,7 @@
     "honocc": {
       "commandName": "Executable",
       "executablePath": "Q:\\wsl\\myproj\\honocc\\honocc\\bin\\Debug\\net6.0.420\\honocc.exe",
-      "commandLineArgs": "test\\csrc\\03_expr\\assign04.c",
+      "commandLineArgs": "test\\csrc\\03_expr\\assiop00.c",
       "workingDirectory": "Q:\\wsl\\myproj\\honocc"
     }
   }

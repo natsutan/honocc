@@ -8,7 +8,7 @@ import argparse
 CSRC_ROOT_DIR = "test/csrc"
 EXPECTED_ROOT_DIR = "test/expected"
 BUILD_DIR = 'honocc'
-COMPILER_PATH = 'honocc/bin/Debug/net6.0/honocc.exe'
+COMPILER_PATH = 'honocc/bin/Debug/net6.0.420/honocc.exe'
 
 total_test_cnt = 0
 x64_passed = 0
