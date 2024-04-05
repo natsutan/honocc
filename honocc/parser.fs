@@ -169,7 +169,7 @@ and expr (ts, fn) =
     | _ ->
         assign(ts, fn)
 
-// assign = variavle { =  locicalor　}
+// assign = variavle { =  assign　}
 //          | locicalor
 and assign (ts, fn) =
     let token = ts.get()
@@ -182,7 +182,7 @@ and assign (ts, fn) =
             match token.Kind with
             | TokenKind.Operator("=") -> 
                 ts.consume()
-                let ast_r = logicalor(ts, fn)
+                let ast_r = assign(ts, fn)
                 ast <- Ast.BinOp({NdBinOp.op=BinOpKind.Assign; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
             | _ ->
                 finish <- true
