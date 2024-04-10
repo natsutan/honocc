@@ -184,6 +184,66 @@ and assign (ts, fn) =
                 ts.consume()
                 let ast_r = assign(ts, fn)
                 ast <- Ast.BinOp({NdBinOp.op=BinOpKind.Assign; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
+            | TokenKind.Operator("+=") -> 
+                ts.consume()
+                let ast_rr = assign(ts, fn)
+                let ast_rl = Ast.Variable({NdVariable.Name=name; NdVariable.Src=token.Src})
+                let ast_r = Ast.BinOp({NdBinOp.op=BinOpKind.Add; NdBinOp.l=ast_rl; NdBinOp.r = ast_rr; NdBinOp.Src=token.Src })
+                ast <- Ast.BinOp({NdBinOp.op=BinOpKind.Assign; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
+            | TokenKind.Operator("-=") -> 
+                ts.consume()
+                let ast_rr = assign(ts, fn)
+                let ast_rl = Ast.Variable({NdVariable.Name=name; NdVariable.Src=token.Src})
+                let ast_r = Ast.BinOp({NdBinOp.op=BinOpKind.Sub; NdBinOp.l=ast_rl; NdBinOp.r = ast_rr; NdBinOp.Src=token.Src })
+                ast <- Ast.BinOp({NdBinOp.op=BinOpKind.Assign; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
+            | TokenKind.Operator("*=") ->
+                ts.consume()
+                let ast_rr = assign(ts, fn)
+                let ast_rl = Ast.Variable({NdVariable.Name=name; NdVariable.Src=token.Src})
+                let ast_r = Ast.BinOp({NdBinOp.op=BinOpKind.Mult; NdBinOp.l=ast_rl; NdBinOp.r = ast_rr; NdBinOp.Src=token.Src })
+                ast <- Ast.BinOp({NdBinOp.op=BinOpKind.Assign; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
+            | TokenKind.Operator("/=") ->
+                ts.consume()
+                let ast_rr = assign(ts, fn)
+                let ast_rl = Ast.Variable({NdVariable.Name=name; NdVariable.Src=token.Src})
+                let ast_r = Ast.BinOp({NdBinOp.op=BinOpKind.Div; NdBinOp.l=ast_rl; NdBinOp.r = ast_rr; NdBinOp.Src=token.Src })
+                ast <- Ast.BinOp({NdBinOp.op=BinOpKind.Assign; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
+            | TokenKind.Operator("%=") ->
+                ts.consume()
+                let ast_rr = assign(ts, fn)
+                let ast_rl = Ast.Variable({NdVariable.Name=name; NdVariable.Src=token.Src})
+                let ast_r = Ast.BinOp({NdBinOp.op=BinOpKind.Modulo; NdBinOp.l=ast_rl; NdBinOp.r = ast_rr; NdBinOp.Src=token.Src })
+                ast <- Ast.BinOp({NdBinOp.op=BinOpKind.Assign; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
+            | TokenKind.Operator("|=") ->
+                ts.consume()
+                let ast_rr = assign(ts, fn)
+                let ast_rl = Ast.Variable({NdVariable.Name=name; NdVariable.Src=token.Src})
+                let ast_r = Ast.BinOp({NdBinOp.op=BinOpKind.BitOr; NdBinOp.l=ast_rl; NdBinOp.r = ast_rr; NdBinOp.Src=token.Src })
+                ast <- Ast.BinOp({NdBinOp.op=BinOpKind.Assign; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
+            | TokenKind.Operator("&=") ->
+                ts.consume()
+                let ast_rr = assign(ts, fn)
+                let ast_rl = Ast.Variable({NdVariable.Name=name; NdVariable.Src=token.Src})
+                let ast_r = Ast.BinOp({NdBinOp.op=BinOpKind.BitAnd; NdBinOp.l=ast_rl; NdBinOp.r = ast_rr; NdBinOp.Src=token.Src })
+                ast <- Ast.BinOp({NdBinOp.op=BinOpKind.Assign; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
+            | TokenKind.Operator("^=") ->
+                ts.consume()
+                let ast_rr = assign(ts, fn)
+                let ast_rl = Ast.Variable({NdVariable.Name=name; NdVariable.Src=token.Src})
+                let ast_r = Ast.BinOp({NdBinOp.op=BinOpKind.BitXor; NdBinOp.l=ast_rl; NdBinOp.r = ast_rr; NdBinOp.Src=token.Src })
+                ast <- Ast.BinOp({NdBinOp.op=BinOpKind.Assign; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
+            | TokenKind.Operator("<<=") ->
+                ts.consume()
+                let ast_rr = assign(ts, fn)
+                let ast_rl = Ast.Variable({NdVariable.Name=name; NdVariable.Src=token.Src})
+                let ast_r = Ast.BinOp({NdBinOp.op=BinOpKind.LShift; NdBinOp.l=ast_rl; NdBinOp.r = ast_rr; NdBinOp.Src=token.Src })
+                ast <- Ast.BinOp({NdBinOp.op=BinOpKind.Assign; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
+            | TokenKind.Operator(">>=") ->
+                ts.consume()
+                let ast_rr = assign(ts, fn)
+                let ast_rl = Ast.Variable({NdVariable.Name=name; NdVariable.Src=token.Src})
+                let ast_r = Ast.BinOp({NdBinOp.op=BinOpKind.RShift; NdBinOp.l=ast_rl; NdBinOp.r = ast_rr; NdBinOp.Src=token.Src })
+                ast <- Ast.BinOp({NdBinOp.op=BinOpKind.Assign; NdBinOp.l=ast; NdBinOp.r = ast_r; NdBinOp.Src=token.Src })
             | _ ->
                 finish <- true
         ast
