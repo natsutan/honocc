@@ -116,8 +116,8 @@ and p_type(ts, fn) =
     | TokenKind.Int -> TokenKind.Int
     | TokenKind.Void -> TokenKind.Void
     | _ -> raise(ParseError(token, $"token must be type"))
-//stmt = expr ";"
-//     = type identifier = expr ";"
+//stmt  = expr ";"
+//      |  type identifier = expr ";"
 and stmt(ts, fn) =
     // 変数宣言のみの時はASTを作らない
     while is_definition ts do
@@ -150,11 +150,18 @@ and def_assign_stmt(ts, fn) =
     let ast_binop = Ast.BinOp({NdBinOp.op=BinOpKind.Assign; NdBinOp.l=Ast.Variable({NdVariable.Name=variable.Name; NdVariable.Src=token_n.Src}); NdBinOp.r = ast; NdBinOp.Src=token_n.Src })
     skip(ts, TokenKind.SemiColon)
     ast_binop
-    
+//stmt2 = exer;
+//      | exer, stmt2
 and stmt2(ts, fn) =
     let ast = expr(ts, fn)
-    skip(ts, TokenKind.SemiColon)
-    ast
+    let token = ts.get()
+    ts.consume()
+    match token.Kind with
+        | TokenKind.SemiColon -> ast
+        | TokenKind.Comma -> ast
+        | _ ->                     
+            let exp = ParseError(token, $"Parse Error token must be , or ; ")  
+            raise exp  
 and declaration(ts, fn) =
     ()
     
@@ -170,6 +177,7 @@ and expr (ts, fn) =
         assign(ts, fn)
 
 // assign = variavle { =  assign　}
+//          | conditional_op
 //          | locicalor
 and assign (ts, fn) =
     let token = ts.get()

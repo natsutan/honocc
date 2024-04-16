@@ -18,6 +18,7 @@ type TokenKind =
    | While
    | SizeOf
    | Comma
+   | Colon
    | SemiColon
    | Return
    | Int
@@ -69,6 +70,7 @@ type NdNum =
 type NdFuncCall = { Name :string; Params : Ast list ; Src : Coordinate }
 and NdBinOp = { op : BinOpKind; l : Ast; r : Ast ; Src : Coordinate  }
 and NdVariable = { Name :string; Src :Coordinate }
+and NDConditionaOp = { c: Ast ; l : Ast; r : Ast ; Src : Coordinate }
 and Ast =
    | Num of NdNum
    | FuncCall of NdFuncCall
